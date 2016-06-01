@@ -5,12 +5,26 @@
 #include <utils_init.h>
 #include <engine_init.h>
 
+#include "mesh.h"
+#include "subdivision.h"
+
+list_t *_geometries = NULL;
+mesh_t *_mesh = NULL;
 
 void keyDownFunc(uchar key)
 {
 	if (key == 27)
 	{
 		Engine.shutdown();
+	}
+	else if (key == 'b')
+	{
+		if (_geometries)
+		{
+			subdivideGeometry(&_geometries);
+			if (_mesh) Mesh.destroyMesh(_mesh);
+			_mesh = meshWithGeometry(_geometries);
+		}
 	}
 }
 
@@ -74,26 +88,27 @@ void updateCamera(inputStruct_t input)
 		velocity[2] -= 1.0f;
 	}
 
+	Vector.scale(velocity, 2.0f, velocity);
+
 	Engine.Camera.setVelocity(velocity);
 }
 
 void initFunc(void)
 {
-	// Init
+	_mesh = cubeWithTriFaces();
+
+	_geometries = geometriesForCube();
+	_mesh = meshWithGeometry(_geometries);
 }
 
 void updateFunc(const timeStruct_t time, const inputStruct_t input)
 {
-	// Update
-
 	updateCamera(input);
 }
 
 void renderFunc(const float viewMatrix[16])
 {
-	drawAxis();
-
-	// Render
+	Mesh.render(_mesh, viewMatrix);
 }
 
 int main(int argc, char **argv)

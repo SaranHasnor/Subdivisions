@@ -41,11 +41,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-	  <AdditionalIncludeDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Interface;$(HASNOR_LIBS_PATH)\Hasnor_Engine;$(HASNOR_LIBS_PATH)\Hasnor_Utils;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Interface;$(HASNOR_LIBS_PATH)\Hasnor_Engine;$(HASNOR_LIBS_PATH)\Hasnor_Utils;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-	  <AdditionalLibraryDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\lib;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glew-1.12.0\lib\Release\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\lib;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glew-1.12.0\lib\Release\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -55,18 +55,21 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-	  <AdditionalIncludeDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Interface;$(HASNOR_LIBS_PATH)\Hasnor_Engine;$(HASNOR_LIBS_PATH)\Hasnor_Utils;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Interface;$(HASNOR_LIBS_PATH)\Hasnor_Engine;$(HASNOR_LIBS_PATH)\Hasnor_Utils;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-	  <AdditionalLibraryDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\lib;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glew-1.12.0\lib\Release\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glut\lib;$(HASNOR_LIBS_PATH)\Hasnor_Engine\Libraries\glew-1.12.0\lib\Release\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="geometry.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="mesh.c" />
+    <ClCompile Include="subdivision.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(HASNOR_LIBS_PATH)\Hasnor_Engine\Hasnor_Engine.vcxproj">
@@ -78,6 +81,11 @@
     <ProjectReference Include="$(HASNOR_LIBS_PATH)\Hasnor_Utils\Hasnor_Utils.vcxproj">
       <Project>{9b213836-dac9-4c0a-83e0-54c218514f43}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="geometry.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="subdivision.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
