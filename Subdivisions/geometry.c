@@ -188,8 +188,21 @@ geom_vertex_t *_getVertexOfGeometryThatIsNotOnEdge(geometry_t *geom, geom_edge_t
 	return NULL;
 }
 
-void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *otherEdge)
+bool _geometriesAreEqual(geometry_t *a, geometry_t *b)
 {
+	uint i;
+	for (i = 0; i < a->uniqueVertices.size; i++)
+	{
+		if (Array.indexOf(&b->uniqueVertices, a->uniqueVertices.content[i]) < 0)
+		{
+			return false;
+		}
+	}
+	return (a->uniqueVertices.size == b->uniqueVertices.size);
+}
+
+bool _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *otherEdge)
+{ // Returns false if the edge is already linked to two different geometries or to this geometry, true otherwise
 	float edgeVec[3], otherVec[3], normal[3];
 	geom_vertex_t *otherVertex = NULL;
 	float vert1pos[3], vert2pos[3], vert3pos[3];
@@ -222,6 +235,22 @@ void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *ot
 		edge->geomLeft = geom;
 	}*/
 
+	if (edge->geomRight)
+	{
+		if (_geometriesAreEqual(GEOM_RIGHT(edge), geom))
+		{
+			return false;
+		}
+	}
+
+	if (edge->geomLeft)
+	{
+		if (_geometriesAreEqual(GEOM_LEFT(edge), geom))
+		{
+			return false;
+		}
+	}
+
 	if (!edge->geomRight)
 	{
 		edge->geomRight = geom;
@@ -233,6 +262,7 @@ void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *ot
 	else
 	{
 		assert(0);
+		return false;
 	}
 
 	edge->catmullEdgePoint.x = 0.0f;
@@ -275,6 +305,8 @@ void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *ot
 
 	_linkNewGeometryToVertex(geom, edge->s1);
 	_linkNewGeometryToVertex(geom, edge->s2);
+
+	return true;
 }
 
 void _precalcGeometryData(geometry_t *geometry)
@@ -321,6 +353,7 @@ geometry_t *newGeometryWithEdges(array_t edges)
 {
 	uint i;
 	geometry_t *geom = newObject(geometry_t);
+	bool success = true;
 
 	geom->edges = edges;
 
@@ -328,9 +361,16 @@ geometry_t *newGeometryWithEdges(array_t edges)
 
 	_precalcGeometryData(geom);
 
-	for (i = 0; i < geom->edges.size; i++)
+	for (i = 0; i < geom->edges.size && success; i++)
 	{
-		_linkNewGeometryToEdge(geom, (geom_edge_t*)geom->edges.content[i], (geom_edge_t*)geom->edges.content[(i+1)%geom->edges.size]);
+		success = _linkNewGeometryToEdge(geom, (geom_edge_t*)geom->edges.content[i], (geom_edge_t*)geom->edges.content[(i+1)%geom->edges.size]);
+	}
+
+	if (!success)
+	{
+		destroy(geom->uniqueVertices.content);
+		destroy(geom);
+		return NULL;
 	}
 
 	Vector.set(geom->color,

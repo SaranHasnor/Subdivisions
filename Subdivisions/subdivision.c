@@ -266,7 +266,7 @@ void subdivideKobbelt(list_t **geometries)
 			geom_edge_t *edge = (geom_edge_t*)geometry->edges.content[i];
 			array_t edgeArray;
 			geometry_t *otherGeometry = getGeometryOnOtherSideOfEdge(edge, geometry);
-			geom_edge_t *edge1, *edge2, *edge3;
+			geometry_t *newGeometry;
 
 			if (!otherGeometry->faceVertex)
 			{
@@ -274,30 +274,24 @@ void subdivideKobbelt(list_t **geometries)
 				*otherGeometry->faceVertex->p = otherGeometry->facePoint;
 			}
 
-			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s1->evolution);
-			edge2 = newEdgeIfItDoesNotExistYet(edge->s1->evolution, otherGeometry->faceVertex);
-			edge3 = newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex);
-
-			//if (!edge1->geomRight || !edge2->geomRight || !edge3->geomRight)
+			Array.init(&edgeArray, 3);
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s1->evolution));
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(edge->s1->evolution, otherGeometry->faceVertex));
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex));
+			newGeometry = newGeometryWithEdges(edgeArray);
+			if (newGeometry)
 			{
-				Array.init(&edgeArray, 3);
-				Array.add(&edgeArray, edge1);
-				Array.add(&edgeArray, edge2);
-				Array.add(&edgeArray, edge3);
-				List.add(&newGeometries, newGeometryWithEdges(edgeArray));
+				List.add(&newGeometries, newGeometry);
 			}
 
-			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s2->evolution);
-			edge2 = newEdgeIfItDoesNotExistYet(edge->s2->evolution, otherGeometry->faceVertex);
-			edge3 = newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex);
-
-			//if (!edge1->geomRight || !edge2->geomRight || !edge3->geomRight)
+			Array.init(&edgeArray, 3);
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s2->evolution));
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(edge->s2->evolution, otherGeometry->faceVertex));
+			Array.add(&edgeArray, newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex));
+			newGeometry = newGeometryWithEdges(edgeArray);
+			if (newGeometry)
 			{
-				Array.init(&edgeArray, 3);
-				Array.add(&edgeArray, edge1);
-				Array.add(&edgeArray, edge2);
-				Array.add(&edgeArray, edge3);
-				List.add(&newGeometries, newGeometryWithEdges(edgeArray));
+				List.add(&newGeometries, newGeometry);
 			}
 		}
 
