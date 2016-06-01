@@ -274,8 +274,8 @@ void subdivideKobbelt(list_t **geometries)
 				*otherGeometry->faceVertex->p = otherGeometry->facePoint;
 			}
 
-			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s1);
-			edge2 = newEdgeIfItDoesNotExistYet(edge->s1, otherGeometry->faceVertex);
+			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s1->evolution);
+			edge2 = newEdgeIfItDoesNotExistYet(edge->s1->evolution, otherGeometry->faceVertex);
 			edge3 = newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex);
 
 			//if (!edge1->geomRight || !edge2->geomRight || !edge3->geomRight)
@@ -287,8 +287,8 @@ void subdivideKobbelt(list_t **geometries)
 				List.add(&newGeometries, newGeometryWithEdges(edgeArray));
 			}
 
-			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s2);
-			edge2 = newEdgeIfItDoesNotExistYet(edge->s2, otherGeometry->faceVertex);
+			edge1 = newEdgeIfItDoesNotExistYet(geometry->faceVertex, edge->s2->evolution);
+			edge2 = newEdgeIfItDoesNotExistYet(edge->s2->evolution, otherGeometry->faceVertex);
 			edge3 = newEdgeIfItDoesNotExistYet(otherGeometry->faceVertex, geometry->faceVertex);
 
 			//if (!edge1->geomRight || !edge2->geomRight || !edge3->geomRight)
