@@ -181,10 +181,49 @@ face_t *_faceWithGeometry(const geometry_t *geometry)
 	face_t *newFace = Mesh.addFace();
 	uint i;
 
-	for (i = 0; i < geometry->uniqueVertices.size; i++)
+	if (geometry->uniqueVertices.size == 4)
+	{ // Special case for quads, make sure they're drawn in the right order
+		geom_vertex_t **vertices = (geom_vertex_t**)geometry->uniqueVertices.content;
+		float diff1[3], diff2[3], diff3[3];
+		float angle1, angle2, angle3;
+
+		Vector.subtract(diff1, (float*)vertices[1]->p, (float*)vertices[0]->p);
+		Vector.subtract(diff2, (float*)vertices[2]->p, (float*)vertices[0]->p);
+		Vector.subtract(diff3, (float*)vertices[3]->p, (float*)vertices[0]->p);
+
+		angle1 = Vector.angleBetween(diff1, diff2);
+		angle2 = Vector.angleBetween(diff2, diff3);
+		angle3 = Vector.angleBetween(diff3, diff1);
+
+		if (angle3 >= angle1 && angle3 >= angle2)
+		{
+			Mesh.addVertex(vertices[0]->p->x, vertices[0]->p->y, vertices[0]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[1]->p->x, vertices[1]->p->y, vertices[1]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[2]->p->x, vertices[2]->p->y, vertices[2]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[3]->p->x, vertices[3]->p->y, vertices[3]->p->z, 0.0f, 0.0f);
+		}
+		else if (angle1 >= angle2 && angle1 >= angle3)
+		{
+			Mesh.addVertex(vertices[0]->p->x, vertices[0]->p->y, vertices[0]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[1]->p->x, vertices[1]->p->y, vertices[1]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[3]->p->x, vertices[3]->p->y, vertices[3]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[2]->p->x, vertices[2]->p->y, vertices[2]->p->z, 0.0f, 0.0f);
+		}
+		else if (angle2 >= angle1 && angle2 >= angle3)
+		{
+			Mesh.addVertex(vertices[0]->p->x, vertices[0]->p->y, vertices[0]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[2]->p->x, vertices[2]->p->y, vertices[2]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[1]->p->x, vertices[1]->p->y, vertices[1]->p->z, 0.0f, 0.0f);
+			Mesh.addVertex(vertices[3]->p->x, vertices[3]->p->y, vertices[3]->p->z, 0.0f, 0.0f);
+		}
+	}
+	else
 	{
-		geom_vertex_t *vert = (geom_vertex_t*)geometry->uniqueVertices.content[i];
-		Mesh.addVertex(vert->p->x, vert->p->y, vert->p->z, 0.0f, 0.0f);
+		for (i = 0; i < geometry->uniqueVertices.size; i++)
+		{
+			geom_vertex_t *vert = (geom_vertex_t*)geometry->uniqueVertices.content[i];
+			Mesh.addVertex(vert->p->x, vert->p->y, vert->p->z, 0.0f, 0.0f);
+		}
 	}
 
 	Vector.copy(newFace->color, geometry->color);
