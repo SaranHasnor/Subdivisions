@@ -58,7 +58,7 @@ geometry_t *_geometryOnSideFromEdge(geom_edge_t *edge, int direction)
 	return NULL;
 }
 
-geometry_t *edgeGetOtherGeometry(geom_edge_t *edge, geometry_t *geometry)
+geometry_t *getGeometryOnOtherSideOfEdge(geom_edge_t *edge, geometry_t *geometry)
 {
 	if (geometry == edge->geomLeft)
 	{
@@ -67,6 +67,19 @@ geometry_t *edgeGetOtherGeometry(geom_edge_t *edge, geometry_t *geometry)
 	else if (geometry == edge->geomRight)
 	{
 		return GEOM_LEFT(edge);
+	}
+	return NULL;
+}
+
+geom_vertex_t *getOtherVertexOnEdge(geom_edge_t *edge, geom_vertex_t *vertex)
+{
+	if (vertex == edge->s1)
+	{
+		return edge->s2;
+	}
+	else if (vertex == edge->s2)
+	{
+		return edge->s1;
 	}
 	return NULL;
 }
@@ -154,6 +167,27 @@ void _linkNewGeometryToVertex(geometry_t *geom, geom_vertex_t *vertex)
 	}
 }
 
+geom_vertex_t *_getVertexOfGeometryThatIsNotOnEdge(geometry_t *geom, geom_edge_t *edge)
+{
+	uint i;
+	for (i = 0; i < geom->edges.size; i++)
+	{
+		geom_edge_t *thisEdge = (geom_edge_t*)geom->edges.content[i];
+		
+		if (thisEdge->s1 != edge->s1 && thisEdge->s1 != edge->s2)
+		{
+			return thisEdge->s1;
+		}
+
+		if (thisEdge->s2 != edge->s1 && thisEdge->s2 != edge->s2)
+		{
+			return thisEdge->s2;
+		}
+	}
+
+	return NULL;
+}
+
 void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *otherEdge)
 {
 	float edgeVec[3], otherVec[3], normal[3];
@@ -201,31 +235,42 @@ void _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *ot
 		assert(0);
 	}
 
-	edge->edgePoint.x = 0.0f;
-	edge->edgePoint.y = 0.0f;
-	edge->edgePoint.z = 0.0f;
+	edge->catmullEdgePoint.x = 0.0f;
+	edge->catmullEdgePoint.y = 0.0f;
+	edge->catmullEdgePoint.z = 0.0f;
+
+	edge->loopEdgePoint.x = 0.0f;
+	edge->loopEdgePoint.y = 0.0f;
+	edge->loopEdgePoint.z = 0.0f;
 
 	if (edge->geomLeft && edge->geomRight)
 	{
-		edge->edgePoint.x += edge->s1->p->x;
-		edge->edgePoint.y += edge->s1->p->y;
-		edge->edgePoint.z += edge->s1->p->z;
+		{
+			point_t *leftFacePoint = &GEOM_LEFT(edge)->facePoint;
+			point_t *rightFacePoint = &GEOM_RIGHT(edge)->facePoint;
+		
+			Vector.add((float*)&edge->catmullEdgePoint, (float*)edge->s1->p, (float*)edge->s2->p);
 
-		edge->edgePoint.x += edge->s2->p->x;
-		edge->edgePoint.y += edge->s2->p->y;
-		edge->edgePoint.z += edge->s2->p->z;
+			edge->catmullEdgePoint.x += leftFacePoint->x + rightFacePoint->x;
+			edge->catmullEdgePoint.y += leftFacePoint->y + rightFacePoint->y;
+			edge->catmullEdgePoint.z += leftFacePoint->z + rightFacePoint->z;
 
-		edge->edgePoint.x += GEOM_LEFT(edge)->facePoint.x;
-		edge->edgePoint.y += GEOM_LEFT(edge)->facePoint.y;
-		edge->edgePoint.z += GEOM_LEFT(edge)->facePoint.z;
+			edge->catmullEdgePoint.x /= 4.0f;
+			edge->catmullEdgePoint.y /= 4.0f;
+			edge->catmullEdgePoint.z /= 4.0f;
+		}
 
-		edge->edgePoint.x += GEOM_RIGHT(edge)->facePoint.x;
-		edge->edgePoint.y += GEOM_RIGHT(edge)->facePoint.y;
-		edge->edgePoint.z += GEOM_RIGHT(edge)->facePoint.z;
+		{
+			point_t *leftFacePoint = _getVertexOfGeometryThatIsNotOnEdge(GEOM_LEFT(edge), edge)->p;
+			point_t *rightFacePoint = _getVertexOfGeometryThatIsNotOnEdge(GEOM_RIGHT(edge), edge)->p;
+			
+			Vector.add((float*)&edge->loopEdgePoint, (float*)edge->s1->p, (float*)edge->s2->p);
+			Vector.scale((float*)&edge->loopEdgePoint, 3.0f / 8.0f, (float*)&edge->loopEdgePoint);
 
-		edge->edgePoint.x /= 4.0f;
-		edge->edgePoint.y /= 4.0f;
-		edge->edgePoint.z /= 4.0f;
+			edge->loopEdgePoint.x += (leftFacePoint->x + rightFacePoint->x) / 8.0f;
+			edge->loopEdgePoint.y += (leftFacePoint->y + rightFacePoint->y) / 8.0f;
+			edge->loopEdgePoint.z += (leftFacePoint->z + rightFacePoint->z) / 8.0f;
+		}
 	}
 
 	_linkNewGeometryToVertex(geom, edge->s1);
@@ -278,6 +323,8 @@ geometry_t *newGeometryWithEdges(array_t edges)
 	geometry_t *geom = newObject(geometry_t);
 
 	geom->edges = edges;
+
+	geom->faceVertex = NULL;
 
 	_precalcGeometryData(geom);
 

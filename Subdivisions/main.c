@@ -17,11 +17,35 @@ void keyDownFunc(uchar key)
 	{
 		Engine.shutdown();
 	}
-	else if (key == 'b')
+	
+	if (_geometries)
 	{
-		if (_geometries)
+		bool regenerate = false;
+
+		if (key == '1')
 		{
-			subdivideGeometry(&_geometries);
+			subdivideCatmull(&_geometries);
+			regenerate = true;
+		}
+		else if (key == '2')
+		{
+			subdivideLoop(&_geometries);
+			regenerate = true;
+		}
+		else if (key == '3')
+		{
+			subdivideKobbelt(&_geometries);
+			regenerate = true;
+		}
+		else if (key == 'r')
+		{
+			List.clear(&_geometries);
+			_geometries = geometriesForCube();
+			regenerate = true;
+		}
+
+		if (regenerate)
+		{
 			if (_mesh) Mesh.destroyMesh(_mesh);
 			_mesh = meshWithGeometry(_geometries);
 		}
@@ -95,8 +119,6 @@ void updateCamera(inputStruct_t input)
 
 void initFunc(void)
 {
-	_mesh = cubeWithTriFaces();
-
 	_geometries = geometriesForCube();
 	_mesh = meshWithGeometry(_geometries);
 }

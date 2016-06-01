@@ -28,19 +28,22 @@ typedef struct {
 	void		*geomLeft;
 	void		*geomRight;
 
+	geom_vertex_t	*edgeVertex;
+
 	// Precalculated data
 	float		direction[3];
 	float		left[3];
 	float		right[3];
-	point_t		edgePoint;
-
-	geom_vertex_t	*edgeVertex;
+	point_t		catmullEdgePoint;
+	point_t		loopEdgePoint;
 } geom_edge_t;
 
 typedef struct {
 	array_t		edges;
 
 	float		color[3];
+
+	geom_vertex_t	*faceVertex;
 
 	// Precalculated data
 	point_t		facePoint;
@@ -57,3 +60,5 @@ geom_edge_t *newEdgeWithVertices(geom_vertex_t *v1, geom_vertex_t *v2);
 geom_edge_t *newEdgeIfItDoesNotExistYet(geom_vertex_t *v1, geom_vertex_t *v2);
 geometry_t *newGeometryWithEdges(array_t edges);
 void getEdgesOfGeometryThatGoThroughVertex(const geometry_t *geometry, const geom_vertex_t *vertex, geom_edge_t **edge1, geom_edge_t **edge2);
+geom_vertex_t *getOtherVertexOnEdge(geom_edge_t *edge, geom_vertex_t *vertex);
+geometry_t *getGeometryOnOtherSideOfEdge(geom_edge_t *edge, geometry_t *geometry);
