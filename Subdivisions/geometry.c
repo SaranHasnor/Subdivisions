@@ -167,7 +167,7 @@ void _linkNewGeometryToVertex(geometry_t *geom, geom_vertex_t *vertex)
 	}
 }
 
-geom_vertex_t *_getVertexOfGeometryThatIsNotOnEdge(geometry_t *geom, geom_edge_t *edge)
+geom_vertex_t *getVertexOfTriangleThatIsNotOnEdge(geometry_t *geom, geom_edge_t *edge)
 {
 	uint i;
 	for (i = 0; i < geom->edges.size; i++)
@@ -291,8 +291,8 @@ bool _linkNewGeometryToEdge(geometry_t *geom, geom_edge_t *edge, geom_edge_t *ot
 		}
 
 		{
-			point_t *leftFacePoint = _getVertexOfGeometryThatIsNotOnEdge(GEOM_LEFT(edge), edge)->p;
-			point_t *rightFacePoint = _getVertexOfGeometryThatIsNotOnEdge(GEOM_RIGHT(edge), edge)->p;
+			point_t *leftFacePoint = getVertexOfTriangleThatIsNotOnEdge(GEOM_LEFT(edge), edge)->p;
+			point_t *rightFacePoint = getVertexOfTriangleThatIsNotOnEdge(GEOM_RIGHT(edge), edge)->p;
 			
 			Vector.add((float*)&edge->loopEdgePoint, (float*)edge->s1->p, (float*)edge->s2->p);
 			Vector.scale((float*)&edge->loopEdgePoint, 3.0f / 8.0f, (float*)&edge->loopEdgePoint);
@@ -522,7 +522,7 @@ list_t *geometriesForCube(void)
 	geometry_t *back1, *back2;
 	geometry_t *right1, *right2;
 	geometry_t *left1, *left2;
-	
+
 	// Bottom
 	Array.init(&edgeArray, 3);
 	Array.add(&edgeArray, e1to2);
@@ -630,6 +630,71 @@ list_t *geometriesForCube(void)
 
 	Vector.set(back1->color, 0.0f, 1.0f, 0.0f);
 	Vector.set(back2->color, 1.0f, 0.0f, 0.0f);
+
+	return geometries;
+}
+
+list_t *geometriesForPyramid(void)
+{
+	list_t *geometries = NULL;
+	array_t edgeArray;
+
+	point_t *p1 = _newPoint(Math.cos(0.0f), Math.sin(0.0f), -0.5f);
+	point_t *p2 = _newPoint(Math.cos(2 * Math.pi / 3.0f), Math.sin(2 * Math.pi / 3.0f), -0.5f);
+	point_t *p3 = _newPoint(Math.cos(4 * Math.pi / 3.0f), Math.sin(4 * Math.pi / 3.0f), -0.5f);
+	point_t *p4 = _newPoint(0.0f, 0.0f, 0.5f);
+
+	geom_vertex_t *v1 = newVertexFromPoint(p1);
+	geom_vertex_t *v2 = newVertexFromPoint(p2);
+	geom_vertex_t *v3 = newVertexFromPoint(p3);
+	geom_vertex_t *v4 = newVertexFromPoint(p4);
+
+	// Bottom edges
+	geom_edge_t *e1to2 = newEdgeWithVertices(v1, v2);
+	geom_edge_t *e2to3 = newEdgeWithVertices(v2, v3);
+	geom_edge_t *e3to1 = newEdgeWithVertices(v3, v1);
+
+	// Top edges
+	geom_edge_t *e1to4 = newEdgeWithVertices(v1, v4);
+	geom_edge_t *e2to4 = newEdgeWithVertices(v2, v4);
+	geom_edge_t *e3to4 = newEdgeWithVertices(v3, v4);
+
+	geometry_t *bottom;
+	geometry_t *side1, *side2, *side3;
+
+	// Bottom
+	Array.init(&edgeArray, 3);
+	Array.add(&edgeArray, e1to2);
+	Array.add(&edgeArray, e2to3);
+	Array.add(&edgeArray, e3to1);
+	bottom = newGeometryWithEdges(edgeArray);
+	List.add(&geometries, bottom);
+	Vector.set(bottom->color, 1.0f, 0.0f, 0.0f);
+
+	// Top
+	Array.init(&edgeArray, 3);
+	Array.add(&edgeArray, e1to2);
+	Array.add(&edgeArray, e1to4);
+	Array.add(&edgeArray, e2to4);
+	side1 = newGeometryWithEdges(edgeArray);
+	List.add(&geometries, side1);
+	Vector.set(side1->color, 0.0f, 1.0f, 0.0f);
+
+	Array.init(&edgeArray, 3);
+	Array.add(&edgeArray, e2to3);
+	Array.add(&edgeArray, e3to4);
+	Array.add(&edgeArray, e2to4);
+	side2 = newGeometryWithEdges(edgeArray);
+	List.add(&geometries, side2);
+	Vector.set(side2->color, 0.0f, 0.0f, 1.0f);
+
+	Array.init(&edgeArray, 3);
+	Array.add(&edgeArray, e3to1);
+	Array.add(&edgeArray, e1to4);
+	Array.add(&edgeArray, e3to4);
+	side3 = newGeometryWithEdges(edgeArray);
+	List.add(&geometries, side3);
+	Vector.set(side3->color, 1.0f, 1.0f, 0.0f);
 
 	return geometries;
 }

@@ -11,6 +11,10 @@
 list_t *_geometries = NULL;
 mesh_t *_mesh = NULL;
 
+static float w = 0.0f;
+static float oldW = 0.0f;
+static float *wPtr = NULL;
+
 void keyDownFunc(uchar key)
 {
 	if (key == 27)
@@ -37,7 +41,18 @@ void keyDownFunc(uchar key)
 			subdivideKobbelt(&_geometries);
 			regenerate = true;
 		}
-		else if (key == 'r')
+		else if (key == '4')
+		{
+			subdivideButterfly(&_geometries, w);
+			regenerate = true;
+		}
+		else if (key == 't' || key == 'r')
+		{
+			List.clear(&_geometries);
+			_geometries = geometriesForPyramid();
+			regenerate = true;
+		}
+		else if (key == 'c')
 		{
 			List.clear(&_geometries);
 			_geometries = geometriesForCube();
@@ -119,13 +134,32 @@ void updateCamera(inputStruct_t input)
 
 void initFunc(void)
 {
-	_geometries = geometriesForCube();
+	uint id;
+	_geometries = geometriesForPyramid();
 	_mesh = meshWithGeometry(_geometries);
+
+	id = Engine.UI.slider(staticPlacement(20, 20, 200, 40));
+	Engine.UI.setSliderValue(id, -1.0f / 16.0f, 1.0f / 16.0f, &w);
+	id = Engine.UI.textField(staticPlacement(240, 20, 100, 40), FIELDTYPE_FLOAT);
+	wPtr = newObject(float);
+	*wPtr = w;
+	Engine.UI.setTextFieldValue(id, -1.0f, 1.0f, (void**)&wPtr, false);
 }
 
 void updateFunc(const timeStruct_t time, const inputStruct_t input)
 {
 	updateCamera(input);
+
+	if (w != oldW)
+	{
+		oldW = w;
+		*wPtr = w;
+		_geometries = geometriesForPyramid();
+		subdivideButterfly(&_geometries, w);
+		subdivideButterfly(&_geometries, w);
+		if (_mesh) Mesh.destroyMesh(_mesh);
+		_mesh = meshWithGeometry(_geometries);
+	}
 }
 
 void renderFunc(const float viewMatrix[16])

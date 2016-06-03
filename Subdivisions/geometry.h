@@ -54,6 +54,7 @@ typedef struct {
 #define GEOM_RIGHT(edge) ((geometry_t*)edge->geomRight)
 
 list_t *geometriesForCube(void);
+list_t *geometriesForPyramid(void);
 
 geom_vertex_t *newVertexFromPoint(point_t *point);
 geom_edge_t *newEdgeWithVertices(geom_vertex_t *v1, geom_vertex_t *v2);
@@ -62,3 +63,4 @@ geometry_t *newGeometryWithEdges(array_t edges);
 void getEdgesOfGeometryThatGoThroughVertex(const geometry_t *geometry, const geom_vertex_t *vertex, geom_edge_t **edge1, geom_edge_t **edge2);
 geom_vertex_t *getOtherVertexOnEdge(geom_edge_t *edge, geom_vertex_t *vertex);
 geometry_t *getGeometryOnOtherSideOfEdge(geom_edge_t *edge, geometry_t *geometry);
+geom_vertex_t *getVertexOfTriangleThatIsNotOnEdge(geometry_t *geom, geom_edge_t *edge);
